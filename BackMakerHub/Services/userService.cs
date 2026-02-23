@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
 using BCrypt.Net;
 using Microsoft.AspNetCore.Identity;
+using System.Data.Common;
 
 namespace BackMakerHub.Services
 {
@@ -73,9 +74,9 @@ namespace BackMakerHub.Services
             return await _context.User.CountAsync();
         }
 
-       public async Task<User?> Authenticate(string username, string password)
+       public async Task<User?> Authenticate(string identifier, string password)
         {
-            var user = await _context.User.FirstOrDefaultAsync(u => u.UserName == username);
+            var user = await _context.User.FirstOrDefaultAsync(u => u.UserName == identifier || u.Email == identifier);
             if(user != null && BCrypt.Net.BCrypt.Verify(password, user.Password))
             {
                 return user;

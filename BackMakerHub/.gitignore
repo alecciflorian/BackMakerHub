@@ -4,3 +4,4 @@
 *.user
 *.dll
 *.exe
+appsettings.Development.json

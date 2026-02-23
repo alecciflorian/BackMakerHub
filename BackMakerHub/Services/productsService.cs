@@ -17,7 +17,21 @@ namespace BackMakerHub.Services
         }
         public async Task<IEnumerable<Products>> GetAllProducts()
         {
-            return await _context.Products.Include(p => p.Category).ToListAsync();
+            var products = await _context.Products.Include(p => p.Category).ToListAsync();
+            var allLogs = await _context.StockLogs.ToListAsync();
+            foreach(var p in products)
+            {
+                var lastLogs = allLogs.Where(s => s.ProductId == p.ProductId).OrderByDescending(s => s.Id).FirstOrDefault();
+                if (lastLogs != null)
+                {
+                    p.LastStockInfo = $"{lastLogs.date} (+{lastLogs.QuantityAdded})";
+                }
+                else
+                {
+                    p.LastStockInfo = "Aucun mouvement";
+                }
+            }
+            return products;
         }
 
         public async Task<Products> AddProductsAsync(ProductsCreateDTO addProductDTO)
@@ -36,6 +50,14 @@ namespace BackMakerHub.Services
                 CategoryId = category.Id,
             };
             _context.Products.Add(newProduct);
+            await _context.SaveChangesAsync();
+
+            var logs = new StockLog
+            {
+                date = DateOnly.FromDateTime(DateTime.Now),
+                ProductId = newProduct.ProductId
+            };
+            _context.StockLogs.Add(logs);
             await _context.SaveChangesAsync();
             return newProduct;
         }
@@ -68,10 +90,26 @@ namespace BackMakerHub.Services
         {
             var product = await _context.Products.FindAsync(id);
             if (product == null) return null;
+            int addedAmount = newQuantity - product.Quantity;
 
             product.Quantity = newQuantity;
+
+            var log = new StockLog
+            {
+                date = DateOnly.FromDateTime(DateTime.Now),
+                ProductId = id,
+                QuantityAdded = addedAmount
+            };
+
+
+            _context.StockLogs.Add(log);
             await _context.SaveChangesAsync();
+            product.LastStockInfo = $"{log.date} ({(addedAmount >= 0 ? "+" : "")}{addedAmount})";
             return product;
+        }
+        public async Task<Products?> GetProductDate(int id)
+        {
+           return await _context.Products.Include(p => p.StockLogs).FirstOrDefaultAsync(p => p.ProductId == id);
         }
     }
 }

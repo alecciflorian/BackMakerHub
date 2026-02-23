@@ -63,7 +63,7 @@ namespace BackMakerHub.Controllers
         [HttpPost("/login")]
         public async Task<ActionResult> Login([FromBody] LoginDTO loginDto)
         {
-            var user = await _userService.Authenticate(loginDto.UserName, loginDto.Password);
+            var user = await _userService.Authenticate(loginDto.UserName ,loginDto.Password);
             if(user == null)
             {
                 return Unauthorized("Utilisateur introuvable. Veuillez vérifier votre identifiant/mot de passe");

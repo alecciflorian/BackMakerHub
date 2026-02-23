@@ -1,5 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 namespace BackMakerHub.Models
 {
@@ -12,7 +14,12 @@ namespace BackMakerHub.Models
         public string Type { get; set; } = null!;
         public int CategoryId { get; set; }
 
+        [NotMapped] //Entity Framework n'ira pas chercher cette colonne en DB
+        [JsonPropertyName("lastStockInfo")]
+        public string? LastStockInfo { get; set; }
+
         public decimal Price { get; set; }
+        public List<StockLog> StockLogs { get; set; } = new();
         public CategoryClass Category { get; set; } = null!;
     }
 }

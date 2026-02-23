@@ -19,11 +19,12 @@ namespace BackMakerHub.Controllers
             _productsService = productsService;
         }
         [HttpGet]
-        public async Task<IEnumerable<Products>> GetAllProducts()
+        public async Task<ActionResult<IEnumerable<Products>>> GetAllProducts()
         {
-            var getAllProducts = _productsService.GetAllProducts();
-            return await getAllProducts;
+            var getAllProducts = await _productsService.GetAllProducts();
+            return Ok(getAllProducts);
         }
+
         [HttpPost]
         [Route("addProduct")]
         public async Task<ActionResult<Products>> AddProducts(ProductsCreateDTO addProductDTO)
@@ -37,7 +38,7 @@ namespace BackMakerHub.Controllers
             {
                 return BadRequest(e.Message);
             }
-            }
+        }
 
         [HttpDelete]
         [Route("{id}")]
